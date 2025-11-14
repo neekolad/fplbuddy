@@ -2,3 +2,7 @@
 __pycache__/
 storage/
 venv/
+*.png
+*.jpg
+*.jpeg
+*.db

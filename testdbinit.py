@@ -55,11 +55,13 @@ def init_db(db_path="fplbuddy.db"):
     conn.commit()
     conn.close()
 
-def insert_row(data, db_path="fplbuddy.db"):
+def insert_match_row(data, table_name, db_path="fplbuddy.db"):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-
-    cursor.execute('INSERT OR REPLACE INTO matches (' + ", ".join([el for el in data.keys()]) + ') VALUES (' + ", ".join(['?' for _ in range(len(data.keys()))]) + ')', tuple(data.values()))
+    columns = ", ".join(data.keys())
+    placeholders = ", ".join(["?" for _ in data])
+    sql = f"INSERT OR REPLACE INTO {table_name} ({columns}) VALUES ({placeholders})"
+    cursor.execute(sql, tuple(data.values()))
     conn.commit()
     conn.close()
 
@@ -72,6 +74,15 @@ def insert_row_snapshot(data, table_name, db_path="fplbuddy.db"):
     cursor.execute(sql, tuple(data.values()))
     conn.commit()
     conn.close()
+
+def get_last_stored_matchweek(db_path="fplbuddy.db"):
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute("SELECT MAX(matchday) FROM matches")
+    row = cur.fetchone()
+    conn.close()
+
+    return row[0] if row[0] else 0
 
 
 init_db()

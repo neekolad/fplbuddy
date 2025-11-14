@@ -11,7 +11,7 @@ TOKEN = os.getenv("TOKEN")
 # url = "https://api.football-data.org/v4/competitions/PL/standings"  # current standings
 
 
-for matchday in range(1, 38):
+for matchday in range(15, 38):
     url = f"https://api.football-data.org/v4/competitions/PL/matches?matchday={matchday}"    # matches on a certain matchday
     headers = {"X-Auth-Token": TOKEN}
 
