@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>{{ title }}</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Team</th>
+        <th>Played</th>
+        <th>W</th>
+        <th>D</th>
+        <th>L</th>
+        <th>GF</th>
+        <th>GA</th>
+        <th>GD</th>
+        <th>Pts</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ loop.index }}.</td>
+        <td>{{ row["team_name"] }}</td>
+        <td>{{ row["played"] }}</td>
+        <td>{{ row["wins"] }}</td>
+        <td>{{ row["draws"] }}</td>
+        <td>{{ row["losses"] }}</td>
+        <td>{{ row["goals_for"] }}</td>
+        <td>{{ row["goals_against"] }}</td>
+        <td>{{ row["goal_difference"] }}</td>
+        <td><strong>{{ row["points"] }}</strong></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const table = document.querySelector("table");
+    const headers = table.querySelectorAll("th");
+    let sortState = {}; // Keeps track of ascending/descending per column
+
+    headers.forEach((header, i) => {
+      header.style.cursor = "pointer";
+      header.addEventListener("click", () => {
+        const rowsArray = Array.from(table.querySelectorAll("tbody tr"));
+        const isAsc = !sortState[i];
+        sortState = {}; // reset other columns
+        sortState[i] = isAsc;
+
+        rowsArray.sort((a, b) => {
+          const aText = a.children[i].innerText.trim();
+          const bText = b.children[i].innerText.trim();
+          const aNum = parseFloat(aText);
+          const bNum = parseFloat(bText);
+
+          if (!isNaN(aNum) && !isNaN(bNum)) {
+            return isAsc ? aNum - bNum : bNum - aNum;
+          }
+          return isAsc
+            ? aText.localeCompare(bText)
+            : bText.localeCompare(aText);
+        });
+
+        const tbody = table.querySelector("tbody");
+        tbody.innerHTML = "";
+        rowsArray.forEach(row => tbody.appendChild(row));
+
+        // Reset all headers, remove arrows and highlight
+        headers.forEach(h => {
+          h.innerText = h.innerText.replace(/ ↑| ↓/, "");
+          h.classList.remove("active-header");
+        });
+
+        // Add arrow and highlight to active column
+        header.innerText += isAsc ? " ↑" : " ↓";
+        header.classList.add("active-header");
+      });
+    });
+  });
+</script>
+
+
+</body>
+</html>
