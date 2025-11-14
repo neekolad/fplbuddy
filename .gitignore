@@ -1,8 +1,41 @@
-.env
+# Byte-compiled / optimized / DLL files
 __pycache__/
-storage/
+*.py[cod]
+*$py.class
+
+# Virtual environments
 venv/
-*.png
-*.jpg
-*.jpeg
+env/
+.venv/
+storage/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# SQLite database
 *.db
+*.sqlite3
+
+# Logs
+*.log
+
+# VSCode
+.vscode/
+.history/
+
+# MacOS
+.DS_Store
+
+# Images / media you don’t want in repo
+*.jpeg
+*.jpg
+*.png
+*.gif
+*.ico
+
+# Secrets / config files
+*.env
+config.py
