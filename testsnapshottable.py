@@ -56,7 +56,7 @@ table = sorted(
 # print(json.dumps(table, indent=4))
 cursor.execute("SELECT COALESCE(MAX(snapshot_id), 0) FROM table_snapshots")
 snapshot_id = cursor.fetchone()[0] + 1
-print(snapshot_id)
+# print(snapshot_id)
 for idx, item in enumerate(table, start=1):
     data = {}
     goal_diff = item[1]["goals_for"] - item[1]["goals_against"]
