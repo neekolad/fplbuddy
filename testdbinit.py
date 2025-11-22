@@ -91,5 +91,5 @@ def get_last_stored_matchweek(db_path="fplbuddy.db"):
     return last_matchday + 1  # increment that number to search for next matchweek
 
 
-# init_db()
+init_db()
 
