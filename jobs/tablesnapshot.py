@@ -1,6 +1,6 @@
 import sqlite3
 import json
-from testdbinit import insert_row_snapshot, db_conn
+from app.dbinit import insert_row_snapshot, db_conn
 
 
 conn = db_conn()

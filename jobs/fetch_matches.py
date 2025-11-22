@@ -3,8 +3,10 @@ import json
 import time
 import os
 from dotenv import load_dotenv
-from app.dbinit import insert_match_row, get_last_stored_matchweek
+from app.dbinit import insert_match_row, get_last_stored_matchweek, init_db
 from app.utils.logger import logger
+
+init_db()
 
 load_dotenv('.env')
 TOKEN = os.getenv("TOKEN")
