@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from app.dbinit import insert_match_row, get_last_stored_matchweek, init_db
 from app.utils.logger import logger
 
+
+logger.info("-"*30, "FETCH MATCHES SCRIPT STARTED", "-"*30)
 init_db()
 
 load_dotenv('.env')
@@ -73,3 +75,4 @@ else:
     
 
 
+logger.info("-"*30, "FETCH MATCHES SCRIPT ENDED", "-"*30)
