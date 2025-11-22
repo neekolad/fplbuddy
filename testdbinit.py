@@ -79,11 +79,19 @@ def get_last_stored_matchweek(db_path="fplbuddy.db"):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     cur.execute("SELECT MAX(matchday) FROM matches")
-    row = cur.fetchone()
+    last_matchday = cur.fetchone()[0] or 0
+    cur.execute(f"SELECT COUNT(*) FROM matches WHERE matchday={last_matchday} AND status='FINISHED'")
+    matchday_matches_count = cur.fetchone()[0]
+    print(f"LAST MATCHDAY: {last_matchday}, num of games: {matchday_matches_count}")
     conn.close()
+    if matchday_matches_count < 10:
+        # if we have less than 10 matches that are FINISHED in a matchday
+        # we still need to make calls for current matchday so return last_matchday
+        return last_matchday
+    return last_matchday + 1  # increment that number to search for next matchweek
 
-    return row[0] if row[0] else 0
+    # return row[0] if row[0] else 0
 
 
-init_db()
+# init_db()
 
