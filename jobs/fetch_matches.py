@@ -24,11 +24,19 @@ data = response.json()
 with open(f'storage/matchday_{curr_matchday}_data.json', 'w') as f:
     f.write(json.dumps(data, indent=4))
 matches_played = data["resultSet"]["played"]
+matches_in_play = 0
+matches_scheduled = 0
+for m in data["matches"]:
+    if m["status"] == "IN_PLAY":
+        matches_in_play+=1
+    if m["status"] == "TIMED":
+        matches_scheduled+=1
+
 
 if not matches_played:
     logger.info(f"matchday {curr_matchday} matches count is 0, breaking out of the loop")
 else:
-    logger.info(f"downloading matches from matchday {curr_matchday} ({matches_played})")
+    logger.info(f"downloading matches from matchday {curr_matchday} (finished: {matches_played}, in play: {matches_in_play}, to be played: {matches_scheduled})")
     for match in data["matches"]:
         row = {}
         row["api_id"]               = match["id"]
