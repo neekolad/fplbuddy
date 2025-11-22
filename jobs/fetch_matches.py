@@ -4,7 +4,7 @@ import time
 import os
 from dotenv import load_dotenv
 from testdbinit import insert_match_row, get_last_stored_matchweek
-from jobs.logger import logger
+from app.utils.logger import logger
 
 load_dotenv('.env')
 TOKEN = os.getenv("TOKEN")
