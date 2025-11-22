@@ -1,4 +1,4 @@
 #TODO:
 
 - refactor code
-- cron */5 * * * * cd /home/youruser/project && /usr/bin/python3 jobs/fetch_matches.py >> logs/$(date +\%Y\%m).log 2>&1
+- */1 * * * * /home/nikola/projects/fplbuddy/venv/bin/python3 /home/nikola/projects/fplbuddy/app/jobs/fetch_matches.py >> logs/$(date +\%Y\%m).log 2>&1 &
