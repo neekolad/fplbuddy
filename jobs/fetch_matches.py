@@ -54,7 +54,7 @@ else:
         row["away_team_ht_score"]   = match["score"]["halfTime"]["away"]
         row["away_team_ft_score"]   = match["score"]["fullTime"]["away"]
         row["winner"]               = match["score"]["winner"]
-        row["referee"]              = match["referees"][0]["name"]
+        row["referee"]              = match["referees"][0]["name"] if len(match["referees"]) else ""
 
         # print(json.dumps(row, indent=4))
         # print("----------------------------------------------")
