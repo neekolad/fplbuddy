@@ -79,7 +79,7 @@ def get_last_stored_matchweek(db_path="fplbuddy.db"):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     cur.execute("SELECT MAX(matchday) FROM matches")
-    last_matchday = cur.fetchone()[0] or 0
+    last_matchday = cur.fetchone()[0] or 1
     cur.execute(f"SELECT COUNT(*) FROM matches WHERE matchday={last_matchday} AND status='FINISHED'")
     matchday_matches_count = cur.fetchone()[0]
     # print(f"LAST MATCHDAY: {last_matchday}, num of games: {matchday_matches_count}")  # debug
