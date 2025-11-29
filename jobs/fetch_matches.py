@@ -37,41 +37,41 @@ for m in data["matches"]:
         matches_scheduled+=1
 
 
-if not matches_played:
-    logger.info(f"matchday {curr_matchday} matches count is 0, breaking out of the loop")
-else:
-    logger.info(f"downloading matches from matchday {curr_matchday} (finished: {matches_played}, in play: {matches_in_play}, to be played: {matches_scheduled})")
-    for match in data["matches"]:
-        row = {}
-        row["api_id"]               = match["id"]
-        row["season"]               = data["filters"]["season"]
-        row["matchday"]             = data["filters"]["matchday"]
-        row["competition"]          = data["competition"]["code"]
-        row["type"]                 = data["competition"]["type"]
+# if not matches_played:
+#     logger.info(f"matchday {curr_matchday} matches count is 0, breaking out of the loop")
+# else:
+logger.info(f"downloading matches from matchday {curr_matchday} (finished: {matches_played}, in play: {matches_in_play}, to be played: {matches_scheduled})")
+for match in data["matches"]:
+    row = {}
+    row["api_id"]               = match["id"]
+    row["season"]               = data["filters"]["season"]
+    row["matchday"]             = data["filters"]["matchday"]
+    row["competition"]          = data["competition"]["code"]
+    row["type"]                 = data["competition"]["type"]
 
-        row["match_date"]           = match["utcDate"]
-        row["status"]               = match["status"]
-        row["home_team_full_name"]  = match["homeTeam"]["name"]
-        row["home_team_short_name"] = match["homeTeam"]["shortName"]
-        row["home_team_abbr"]       = match["homeTeam"]["tla"]
-        row["home_team_crest"]      = match["homeTeam"]["crest"]
+    row["match_date"]           = match["utcDate"]
+    row["status"]               = match["status"]
+    row["home_team_full_name"]  = match["homeTeam"]["name"]
+    row["home_team_short_name"] = match["homeTeam"]["shortName"]
+    row["home_team_abbr"]       = match["homeTeam"]["tla"]
+    row["home_team_crest"]      = match["homeTeam"]["crest"]
 
-        row["away_team_full_name"]  = match["awayTeam"]["name"]
-        row["away_team_short_name"] = match["awayTeam"]["shortName"]
-        row["away_team_abbr"]       = match["awayTeam"]["tla"]
-        row["away_team_crest"]      = match["awayTeam"]["crest"]
+    row["away_team_full_name"]  = match["awayTeam"]["name"]
+    row["away_team_short_name"] = match["awayTeam"]["shortName"]
+    row["away_team_abbr"]       = match["awayTeam"]["tla"]
+    row["away_team_crest"]      = match["awayTeam"]["crest"]
 
-        row["home_team_ht_score"]   = match["score"]["halfTime"]["home"]
-        row["home_team_ft_score"]   = match["score"]["fullTime"]["home"]
-        row["away_team_ht_score"]   = match["score"]["halfTime"]["away"]
-        row["away_team_ft_score"]   = match["score"]["fullTime"]["away"]
-        row["winner"]               = match["score"]["winner"]
-        row["referee"]              = match["referees"][0]["name"] if len(match["referees"]) else ""
+    row["home_team_ht_score"]   = match["score"]["halfTime"]["home"]
+    row["home_team_ft_score"]   = match["score"]["fullTime"]["home"]
+    row["away_team_ht_score"]   = match["score"]["halfTime"]["away"]
+    row["away_team_ft_score"]   = match["score"]["fullTime"]["away"]
+    row["winner"]               = match["score"]["winner"]
+    row["referee"]              = match["referees"][0]["name"] if len(match["referees"]) else ""
 
-        # print(json.dumps(row, indent=4))
-        # print("----------------------------------------------")
+    # print(json.dumps(row, indent=4))
+    # print("----------------------------------------------")
 
-        insert_match_row(row, "matches")
+    insert_match_row(row, "matches")
     
 
 
