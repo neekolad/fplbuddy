@@ -24,7 +24,7 @@ def repack_table(data):
         reverse=True
     )
     serialized_table = json.dumps(table, indent=4)
-    print("OLD TABLE:", serialized_table)
+    logger.debug(f"OLD TABLE:\n{serialized_table}")
     return serialized_table
         
 def is_different_table(old_table, new_table):
@@ -76,38 +76,38 @@ for match in res.fetchall():
         standings[home]["points"] += 1
         standings[away]["points"] += 1
 
-print(standings)
 
 new_table = sorted(
     standings.items(),
     key=lambda x: (x[1]["points"], x[1]["goals_for"] - x[1]["goals_against"]),
     reverse=True
 )
+
 serialized_new_table = json.dumps(new_table, indent=4)
-# print("NEW TABLE:", serialized_new_table)
+logger.debug(f"NEW TABLE:\n{serialized_new_table}")
 
 new_table_hash = hashlib.sha256(serialized_new_table.encode("utf-8")).hexdigest()
-# print("NEW TABLE HASH:", new_table_hash)
+logger.debug(f"NEW TABLE HASH: {new_table_hash}")
 
 # print(json.dumps(table, indent=4))
 cursor.execute("SELECT COALESCE(MAX(snapshot_id), 0) FROM table_snapshots")
 snapshot_id = cursor.fetchone()[0]
 next_snapshot_id = snapshot_id + 1
-# print(snapshot_id)
+logger.debug(f"current snapshot ID: {snapshot_id}, next snapshot id: {next_snapshot_id}")
 
 # fetch latest table
 last_table_sql = f"SELECT * FROM table_snapshots WHERE snapshot_id={snapshot_id}"
 cursor.execute(last_table_sql)
 last_inserted_table = [dict(row) for row in cursor.fetchall()]
-# print(last_inserted_table)
-# print(json.dumps(last_inserted_table, indent=4))
+# logger.debug(last_inserted_table)
+# logger.debug(json.dumps(last_inserted_table, indent=4))
 
 # repack the data to fit the dict above that we are going to compare it to
 repacked_last_table = repack_table(last_inserted_table)
 
 # make hash out of it
 repacked_table_hash = hashlib.sha256(repacked_last_table.encode("utf-8")).hexdigest()
-print("OLD TABLE HASH:", repacked_table_hash)
+logger.debug(f"OLD TABLE HASH: {repacked_table_hash}")
 
 # comapare it to the one we want to insert
 if is_different_table(new_table_hash, repacked_table_hash):
@@ -124,7 +124,7 @@ if is_different_table(new_table_hash, repacked_table_hash):
         insert_row_snapshot(data, "table_snapshots")
         # print(data)
 else:
-    print("Not inserting new table because its the same as the old one")
+    logger.info("Not inserting new table because its the same as the old one")
 
 
 conn.close()
