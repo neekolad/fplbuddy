@@ -33,74 +33,81 @@ def is_different_table(old_table, new_table):
         return False
     return True
 
+def make_new_table(cursor):
+    res = cursor.execute("SELECT * FROM matches WHERE `competition`='PL' AND `status`='FINISHED'")
+    standings = {}
+
+    for match in res.fetchall():
+        home = match["home_team_full_name"]
+        away = match["away_team_full_name"]
+        home_score = match["home_team_ft_score"]
+        away_score = match["away_team_ft_score"]
+
+        # Ensure teams exist in dict
+        for team in [home, away]:
+            if team not in standings:
+                standings[team] = {
+                    "played": 0, "wins": 0, "draws": 0, "losses": 0,
+                    "goals_for": 0, "goals_against": 0, "points": 0
+                }
+
+        standings[home]["played"] += 1
+        standings[away]["played"] += 1
+
+        standings[home]["goals_for"] += home_score
+        standings[home]["goals_against"] += away_score
+        standings[away]["goals_for"] += away_score
+        standings[away]["goals_against"] += home_score
+
+        if home_score > away_score:
+            standings[home]["wins"] += 1
+            standings[away]["losses"] += 1
+            standings[home]["points"] += 3
+        elif away_score > home_score:
+            standings[away]["wins"] += 1
+            standings[home]["losses"] += 1
+            standings[away]["points"] += 3
+        else:
+            standings[home]["draws"] += 1
+            standings[away]["draws"] += 1
+            standings[home]["points"] += 1
+            standings[away]["points"] += 1
+
+    new_table = sorted(
+        standings.items(),
+        key=lambda x: (x[1]["points"], x[1]["goals_for"] - x[1]["goals_against"]),
+        reverse=True
+    )
+    return new_table
+
+def fetch_latest_snapshot_id(cursor):
+    cursor.execute("SELECT COALESCE(MAX(snapshot_id), 0) FROM table_snapshots")
+    return cursor.fetchone()[0]
+
+def fetch_last_inserted_table(cursor, last_snapshot_id):
+    cursor.execute(f"SELECT * FROM table_snapshots WHERE snapshot_id={last_snapshot_id}")
+    return [dict(row) for row in cursor.fetchall()]
 
 conn = db_conn()
 conn.row_factory = sqlite3.Row
 cursor = conn.cursor()
-res = cursor.execute("SELECT * FROM matches WHERE `competition`='PL' AND `status`='FINISHED'")
-standings = {}
 
-for match in res.fetchall():
-    home = match["home_team_full_name"]
-    away = match["away_team_full_name"]
-    home_score = match["home_team_ft_score"]
-    away_score = match["away_team_ft_score"]
-
-    # Ensure teams exist in dict
-    for team in [home, away]:
-        if team not in standings:
-            standings[team] = {
-                "played": 0, "wins": 0, "draws": 0, "losses": 0,
-                "goals_for": 0, "goals_against": 0, "points": 0
-            }
-
-    standings[home]["played"] += 1
-    standings[away]["played"] += 1
-
-    standings[home]["goals_for"] += home_score
-    standings[home]["goals_against"] += away_score
-    standings[away]["goals_for"] += away_score
-    standings[away]["goals_against"] += home_score
-
-    if home_score > away_score:
-        standings[home]["wins"] += 1
-        standings[away]["losses"] += 1
-        standings[home]["points"] += 3
-    elif away_score > home_score:
-        standings[away]["wins"] += 1
-        standings[home]["losses"] += 1
-        standings[away]["points"] += 3
-    else:
-        standings[home]["draws"] += 1
-        standings[away]["draws"] += 1
-        standings[home]["points"] += 1
-        standings[away]["points"] += 1
-
-
-new_table = sorted(
-    standings.items(),
-    key=lambda x: (x[1]["points"], x[1]["goals_for"] - x[1]["goals_against"]),
-    reverse=True
-)
-
+# generate new table from matches db
+new_table = make_new_table(cursor)
 serialized_new_table = json.dumps(new_table, indent=4)
 logger.debug(f"NEW TABLE:\n{serialized_new_table}")
 
 new_table_hash = hashlib.sha256(serialized_new_table.encode("utf-8")).hexdigest()
 logger.debug(f"NEW TABLE HASH: {new_table_hash}")
 
-# print(json.dumps(table, indent=4))
-cursor.execute("SELECT COALESCE(MAX(snapshot_id), 0) FROM table_snapshots")
-snapshot_id = cursor.fetchone()[0]
+
+# get latest snapshot_id
+snapshot_id = fetch_latest_snapshot_id(cursor)
 next_snapshot_id = snapshot_id + 1
 logger.debug(f"current snapshot ID: {snapshot_id}, next snapshot id: {next_snapshot_id}")
 
 # fetch latest table
-last_table_sql = f"SELECT * FROM table_snapshots WHERE snapshot_id={snapshot_id}"
-cursor.execute(last_table_sql)
-last_inserted_table = [dict(row) for row in cursor.fetchall()]
-# logger.debug(last_inserted_table)
-# logger.debug(json.dumps(last_inserted_table, indent=4))
+last_inserted_table = fetch_last_inserted_table(cursor, snapshot_id)
 
 # repack the data to fit the dict above that we are going to compare it to
 repacked_last_table = repack_table(last_inserted_table)
@@ -125,6 +132,5 @@ if is_different_table(new_table_hash, repacked_table_hash):
         # print(data)
 else:
     logger.info("Not inserting new table because its the same as the old one")
-
 
 conn.close()
